@@ -1419,6 +1419,10 @@ class ChiselDoPrim(e: DoPrim){
         val op = if(ctx.isHardware) " =/= " else " != "
         e1.chiselize(uctx) ++ ChiselTxtS(e, ctx, op) ++ e2.chiselize(uctx)
 
+      case (b: Add, Seq(e1, e2)) =>
+        val op = if(ctx.isHardware && e1.kind == HwExpressionKind && e2.kind == HwExpressionKind) " +& " else " + "
+        safeChiselize(e1, uctx) ++ ChiselTxtS(b, ctx, s" ${op} ") ++ safeChiselize(e2, uctx)
+
       /// LogicalShiftRight 
       case (e: LogShr, Seq(e1, e2)) => 
         val op = if(ctx.isHardware) " >> " else " >>> " // should not rely on context but on HwExpressionKind
