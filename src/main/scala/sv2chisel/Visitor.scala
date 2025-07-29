@@ -1846,6 +1846,9 @@ class Visitor(
     ctx.event_expression_item.asScala.toSeq.map(getEventExpressionItem) match {
       case Seq() => unsupportedEvent(ctx,"null event_expression")
       case Seq(e) => e 
+      case Seq(e, _) =>
+        unsupportedEvent(ctx,"multiple event_expression")
+        e
       case _ => unsupportedEvent(ctx,"multiple event_expression")
     }
   }
@@ -2234,6 +2237,7 @@ class Visitor(
     val st = visitStatement(ctx.statement)
     (st, kw.KW_ALWAYS, kw.KW_ALWAYS_COMB, kw.KW_ALWAYS_LATCH, kw.KW_ALWAYS_FF) match {
       case (s: ClockRegion, null, null, null, _) => s // always ff must be clocked
+      case (s, null, null, null, _) => s
       case (_, null, null, _, null) => // always latch must not be clocked
         if(st.isInstanceOf[ClockRegion]) unsupported.raiseIt(ctx, "Inconsistent use of always_latch keyword")
         st
